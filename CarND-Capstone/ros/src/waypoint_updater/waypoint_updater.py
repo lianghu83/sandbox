@@ -24,7 +24,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
-STOP_LINE_ADVANCE_DIST = 7.0 # How far ahead of the stop line to stop the car
+STOP_LINE_ADVANCE_DIST = 10.0 # How far ahead of the stop line to stop the car
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -46,7 +46,7 @@ class WaypointUpdater(object):
         self.current_pose = None
         self.traffic_wp_idx = -1
         self.veh_wp_idx = None
-        
+
         self.veh_decel_slope = None
 
         self.loop()
@@ -83,7 +83,7 @@ class WaypointUpdater(object):
 
     def update_waypoints(self):
         if (self.traffic_wp_idx == -1) or (self.traffic_wp_idx > ((self.veh_wp_idx + LOOKAHEAD_WPS) % len(self.base_waypoints))):
-            #rospy.logwarn('okay to move ahead')
+            #rospy.loginfo('okay to move ahead')
             self.final_waypoint = self.lookahead_waypoints
             self.veh_decel_slope = None
         else:
@@ -98,7 +98,7 @@ class WaypointUpdater(object):
                 self.veh_decel_slope = cur_velocity/max((dist_to_stop_line-STOP_LINE_ADVANCE_DIST), 0.001) # avoid division-by-zero
 
             # update waypoint velocity
-            #rospy.logwarn('Red Traffic Light ahead at distance %f', dist_to_stop_line)
+            rospy.logwarn('Red Traffic Light ahead at distance %f', dist_to_stop_line)
             self.final_waypoint = Lane()
             temp_wp = Waypoint()
             for i in range(LOOKAHEAD_WPS):
