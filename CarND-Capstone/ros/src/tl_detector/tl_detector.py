@@ -114,6 +114,7 @@ class TLDetector(object):
                     smallest_dist_between_wp = dist_between_wp
                     upcoming_traffic_light_idx = i
 
+            rospy.logwarn('smallest dist = %f', smallest_dist_between_wp)
             # get state of the light
             state = self.lights[upcoming_traffic_light_idx].state
             light_pose = Pose()
@@ -135,8 +136,11 @@ class TLDetector(object):
                 light_wp_idx = light_wp_idx if state == TrafficLight.RED else -1
                 self.last_wp = light_wp_idx
                 self.upcoming_red_light_pub.publish(Int32(light_wp_idx))
+                rospy.logwarn('[1]publishing %d', light_wp_idx)
             else:
                 self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+                rospy.logwarn('[2]publishing %d', self.last_wp)
+            rospy.logwarn('state = %s, x=%f, y=%f',state, self.lights[upcoming_traffic_light_idx].pose.pose.position.x, self.lights[upcoming_traffic_light_idx].pose.pose.position.y)
             self.state_count += 1
 
         else:

@@ -9,7 +9,7 @@ ONE_MPH = 0.44704
 
 THROTTLE_MIN = -1.0 # Actual minimum is 0.0, it is set to -1.0 to find the amount of braking
 THROTTLE_MAX = 1.0
-BRAKE_SLOWDOWN_TORQUE = 100.
+BRAKE_SLOWDOWN_TORQUE = 200.
 BRAKE_MAX_TORQUE = 700.
 
 class Controller(object):
@@ -64,7 +64,7 @@ class Controller(object):
                 throttle = 0.0
 
             # check if the vehicle needs to come at a full stop
-            if((desired_linear_vel.x < 0.1) and (throttle < 0.1)):
+            if((desired_linear_vel.x < 0.2) and (throttle < 0.1)):
                 brake = BRAKE_MAX_TORQUE
 
             steering = self.steer_yaw_controller.get_steering(desired_linear_vel.x, desired_angular_vel.z, cur_velocity.x)

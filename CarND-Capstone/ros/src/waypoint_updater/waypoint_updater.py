@@ -24,7 +24,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
-STOP_LINE_ADVANCE_DIST = 5.0 # How far ahead of the stop line to stop the car
+STOP_LINE_ADVANCE_DIST = 7.0 # How far ahead of the stop line to stop the car
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -46,6 +46,8 @@ class WaypointUpdater(object):
         self.current_pose = None
         self.traffic_wp_idx = -1
         self.veh_wp_idx = None
+        
+        self.veh_decel_slope = None
 
         self.loop()
 
@@ -81,7 +83,9 @@ class WaypointUpdater(object):
 
     def update_waypoints(self):
         if (self.traffic_wp_idx == -1) or (self.traffic_wp_idx > ((self.veh_wp_idx + LOOKAHEAD_WPS) % len(self.base_waypoints))):
+            #rospy.logwarn('okay to move ahead')
             self.final_waypoint = self.lookahead_waypoints
+            self.veh_decel_slope = None
         else:
             # red light ahead
             dist_to_stop_line = self.distance(self.base_waypoints, self.veh_wp_idx, self.traffic_wp_idx)
@@ -90,21 +94,22 @@ class WaypointUpdater(object):
             else:
                 n_waypoints = self.traffic_wp_idx - ((self.veh_wp_idx + len(self.base_waypoints))  % len(self.base_waypoints))
             cur_velocity = self.lookahead_waypoints.waypoints[0].twist.twist.linear.x
-            veh_decel_slope = cur_velocity/max((dist_to_stop_line-STOP_LINE_ADVANCE_DIST), 0.001) # avoid division-by-zero
+            if self.veh_decel_slope is None:
+                self.veh_decel_slope = cur_velocity/max((dist_to_stop_line-STOP_LINE_ADVANCE_DIST), 0.001) # avoid division-by-zero
 
             # update waypoint velocity
-            rospy.loginfo('Red Traffic Light ahead at distance %f', dist_to_stop_line)
+            #rospy.logwarn('Red Traffic Light ahead at distance %f', dist_to_stop_line)
             self.final_waypoint = Lane()
             temp_wp = Waypoint()
             for i in range(LOOKAHEAD_WPS):
                 wp_dist_to_stop_line = self.distance(self.base_waypoints, self.veh_wp_idx+i, self.traffic_wp_idx)
                 temp_wp = self.lookahead_waypoints.waypoints[i]
                 # modify the velocity
-                temp_wp.twist.twist.linear.x = max(0.0, (wp_dist_to_stop_line - STOP_LINE_ADVANCE_DIST)*veh_decel_slope)
+                temp_wp.twist.twist.linear.x = max(0.0, (wp_dist_to_stop_line - STOP_LINE_ADVANCE_DIST)*self.veh_decel_slope)
                 #temp_wp.twist.twist.linear.x = self.lookahead_waypoints.waypoints[i].twist.twist.linear.y
-                if(i < 10):
-                    rospy.logwarn('[%d] total dist/cur dist = %f/%f; decel slope = %f; setting velocity = %f',
-                        i, dist_to_stop_line, wp_dist_to_stop_line, veh_decel_slope, temp_wp.twist.twist.linear.x)
+                #if(i < 10):
+                #    rospy.logwarn('[%d] total dist/cur dist = %f/%f; decel slope = %f; setting velocity = %f',
+                #        i, dist_to_stop_line, wp_dist_to_stop_line, self.veh_decel_slope, temp_wp.twist.twist.linear.x)
 
                 self.final_waypoint.waypoints.append(Waypoint(temp_wp.pose, temp_wp.twist))
 
