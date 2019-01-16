@@ -87,7 +87,7 @@ class TLDetector(object):
 
         if (closest_traffic_light_idx is not -1):
            self.upcoming_traffic_light = self.config['stop_line_positions'][closest_traffic_light_idx]
-           rospy.logwarn('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][i][0], self.config['stop_line_positions'][i][1], closest_traffic_light_dist)
+           rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][i][0], self.config['stop_line_positions'][i][1], closest_traffic_light_dist)
         else:
            self.upcoming_traffic_light = None
 
@@ -153,7 +153,6 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
-        rospy.logwarn('in the image callback')
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
