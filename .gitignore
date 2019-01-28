@@ -1,0 +1,10 @@
+*.py[cod]
+
+.cmd
+build
+devel
+log
+*.bag
+traffic_light_training*
+
+profile.tmp
