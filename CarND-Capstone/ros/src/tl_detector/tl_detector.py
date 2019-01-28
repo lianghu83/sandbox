@@ -137,7 +137,7 @@ class TLDetector(object):
                 self.upcoming_red_light_pub.publish(Int32(light_wp_idx))
             else:
                 self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-            
+
             self.state_count += 1
 
         else:

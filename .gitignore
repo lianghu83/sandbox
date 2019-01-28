@@ -1,0 +1,6 @@
+*.py[cod]
+
+build
+devel
+log
+*.bag
