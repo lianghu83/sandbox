@@ -28,6 +28,10 @@ RUN apt-get install -y ros-$ROS_DISTRO-image-proc
 # socket io
 RUN apt-get install -y netbase
 
+# set bash parameters
+RUN echo "export ROS_IP=`hostname -I`" >> ~/.bashrc
+RUN echo "source /capstone/ros/devel/setup.bash" >> ~/.bashrc
+
 RUN mkdir /capstone
 VOLUME ["/capstone"]
 VOLUME ["/root/.ros/log/"]

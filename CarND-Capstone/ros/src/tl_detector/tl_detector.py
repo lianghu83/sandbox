@@ -14,7 +14,7 @@ import math
 import numpy as np
 
 STATE_COUNT_THRESHOLD = 3
-RELEVANT_TRAFFIC_LIGHT_DIST = 40.
+RELEVANT_TRAFFIC_LIGHT_DIST = 50.
 
 class TLDetector(object):
     def __init__(self):
@@ -62,7 +62,6 @@ class TLDetector(object):
 
     def pose_cb(self, msg):
         self.current_pose = msg.pose
-        #rospy.logwarn('callback from tl_detector: \n%s', msg.pose.position)
         closest_traffic_light_idx = -1
         closest_traffic_light_dist = 10000.0
         # check if a traffic light is approaching
@@ -80,7 +79,6 @@ class TLDetector(object):
                 # make sure the traffic light is within a relevant distance and ahead of vehicle
                 if((stop_line_dist < RELEVANT_TRAFFIC_LIGHT_DIST) and
                    (self.config['stop_line_positions'][i][0] > self.base_waypoints[closest_wp_idx][0])):
-                   #rospy.logwarn('Stop Line = %f; Wp = %f', self.config['stop_line_positions'][i][0], self.base_waypoints[closest_wp_idx][0])
                    # pick the traffic light closest to vehicle
                    if(stop_line_dist < closest_traffic_light_dist):
                        closest_traffic_light_dist = stop_line_dist
@@ -88,7 +86,7 @@ class TLDetector(object):
 
         if (closest_traffic_light_idx is not -1):
            self.upcoming_traffic_light = self.config['stop_line_positions'][closest_traffic_light_idx]
-           rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][i][0], self.config['stop_line_positions'][i][1], closest_traffic_light_dist)
+           rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][i][closest_traffic_light_idx], self.config['stop_line_positions'][i][closest_traffic_light_idx], closest_traffic_light_dist)
         else:
            self.upcoming_traffic_light = None
 
@@ -158,7 +156,6 @@ class TLDetector(object):
         self.has_image = True
         self.camera_image = msg
         light_wp, state = self.process_traffic_lights()
-        #rospy.logwarn(light_wp, state)
 
         '''
         Publish upcoming red lights at camera frequency.
