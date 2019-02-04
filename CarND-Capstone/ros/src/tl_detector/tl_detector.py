@@ -15,6 +15,7 @@ import numpy as np
 
 STATE_COUNT_THRESHOLD = 3
 RELEVANT_TRAFFIC_LIGHT_DIST = 50.
+USE_SIMULATOR_TL_DATA = True
 
 class TLDetector(object):
     def __init__(self):
@@ -27,6 +28,12 @@ class TLDetector(object):
 
         self.base_waypoints = []
 
+        config_string = rospy.get_param("/traffic_light_config")
+        self.config = yaml.load(config_string)
+        global USE_SIMULATOR_TL_DATA
+        if self.config['is_site'] is True:
+            USE_SIMULATOR_TL_DATA = False
+
         # set buffer size for /current_pose in order to avoid delay in receiving updated pose
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb, queue_size=1, buff_size=2**24)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -38,11 +45,10 @@ class TLDetector(object):
         simulator. When testing on the vehicle, the color state will not be available. You'll need to
         rely on the position of the light and the camera image to predict it.
         '''
-        #sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
-
-        config_string = rospy.get_param("/traffic_light_config")
-        self.config = yaml.load(config_string)
+        if USE_SIMULATOR_TL_DATA is True:
+            sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
+        else:
+            sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
 
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
@@ -86,7 +92,7 @@ class TLDetector(object):
 
         if (closest_traffic_light_idx is not -1):
            self.upcoming_traffic_light = self.config['stop_line_positions'][closest_traffic_light_idx]
-           rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][i][closest_traffic_light_idx], self.config['stop_line_positions'][i][closest_traffic_light_idx], closest_traffic_light_dist)
+           rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][closest_traffic_light_idx][0], self.config['stop_line_positions'][closest_traffic_light_idx][1], closest_traffic_light_dist)
         else:
            self.upcoming_traffic_light = None
 
