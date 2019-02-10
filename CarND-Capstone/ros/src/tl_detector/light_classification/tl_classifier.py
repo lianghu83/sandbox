@@ -13,7 +13,7 @@ from styx_msgs.msg import TrafficLight
 from yolo3.model import yolo_eval
 
 class TLClassifier(object):
-    def __init__(self):
+    def __init__(self, simulator_mode = True):
         # Initialize YOLO detection parameters
         self.detection_threshold = 0.35
         self.iou_threshold = 0.45
@@ -22,7 +22,10 @@ class TLClassifier(object):
         self.scale = 1/255
         self.num_classes = 3 # Classes: RED = 0, YELLOW = 1, GREEN = 2
 
-        model_path = '/capstone/ros/src/tl_detector/light_classification/traffic_lights-tiny-model.h5'
+        if simulator_mode:
+            model_path = '/capstone/ros/src/tl_detector/light_classification/yolo3/traffic_lights_weights-simulator.h5'
+        else:
+            model_path = '/capstone/ros/src/tl_detector/light_classification/yolo3/traffic_lights_weights-site.h5'
 
         # YOLOv3-tiny anchors
         anchors = [10.,14.,  23.,27.,  37.,58.,  81.,82.,  135.,169.,  344.,319.]
