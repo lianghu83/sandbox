@@ -1,5 +1,6 @@
 from __future__ import division
 
+import rospy
 import cv2
 import numpy as np
 import glob
@@ -22,11 +23,13 @@ class TLClassifier(object):
         self.scale = 1/255
         self.num_classes = 3 # Classes: RED = 0, YELLOW = 1, GREEN = 2
 
+        model_path = '/capstone/ros/src/tl_detector/light_classification/yolo3/traffic_lights_weights-{}.h5'
         if simulator_mode:
-            model_path = '/capstone/ros/src/tl_detector/light_classification/yolo3/traffic_lights_weights-simulator.h5'
+            model_path = model_path.format('simulator')
         else:
-            model_path = '/capstone/ros/src/tl_detector/light_classification/yolo3/traffic_lights_weights-site.h5'
+            model_path = model_path.format('site')
 
+        # rospy.loginfo("Loading %s", model_path)
         # YOLOv3-tiny anchors
         anchors = [10.,14.,  23.,27.,  37.,58.,  81.,82.,  135.,169.,  344.,319.]
         self.anchors = np.array(anchors).reshape(-1, 2)
