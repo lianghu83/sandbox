@@ -13,7 +13,7 @@ import yaml
 import math
 import numpy as np
 
-STATE_COUNT_THRESHOLD = 3
+STATE_COUNT_THRESHOLD = 2
 RELEVANT_TRAFFIC_LIGHT_DIST = 50.
 
 class TLDetector(object):
@@ -26,6 +26,8 @@ class TLDetector(object):
         self.lights = []
 
         self.base_waypoints = []
+        self.upcoming_traffic_light = None
+        self.current_pose = None
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -54,9 +56,6 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
-
-        self.upcoming_traffic_light = None
-        self.current_pose = None
 
         image_topic = '/image_raw'
         if simulator_mode:
@@ -209,7 +208,7 @@ class TLDetector(object):
         idx = None
         waypoint = None
         min_dist = 100000.
-        if (self.base_waypoints is not None):
+        if ((self.base_waypoints is not None) and (pose is not None)):
             for i in range(len(self.base_waypoints)):
                 dist = self.euclidean_dist_2d(self.base_waypoints[i], [pose.position.x, pose.position.y])
                 if(dist < min_dist):
