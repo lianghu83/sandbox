@@ -1,5 +1,5 @@
 classes = 3
-train = /home/shubham/workspace/udacity/self_driving_car/sandbox/data/traffic_lights_sim_train.txt
-valid = /home/shubham/workspace/udacity/self_driving_car/sandbox/data/traffic_lights_sim_test.txt
+train = /home/shubham/workspace/udacity/self_driving_car/sandbox/data/traffic_lights_train.txt
+valid = /home/shubham/workspace/udacity/self_driving_car/sandbox/data/traffic_lights_test.txt
 names = /home/shubham/workspace/udacity/self_driving_car/sandbox/cfg/traffic_lights_obj.names
 backup = /home/shubham/workspace/udacity/self_driving_car/sandbox/model
