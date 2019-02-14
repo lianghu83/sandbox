@@ -13,8 +13,8 @@ import yaml
 import math
 import numpy as np
 
-STATE_COUNT_THRESHOLD = 2
-RELEVANT_TRAFFIC_LIGHT_DIST = 50.
+STATE_COUNT_THRESHOLD = 3
+RELEVANT_TRAFFIC_LIGHT_DIST = 100.
 
 class TLDetector(object):
     def __init__(self):
@@ -44,7 +44,8 @@ class TLDetector(object):
         simulator. When testing on the vehicle, the color state will not be available. You'll need to
         rely on the position of the light and the camera image to predict it.
         '''
-        sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
+        # Uncomment the line below if running the simulator and do not want to use camera data
+        #sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
 
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
@@ -68,6 +69,8 @@ class TLDetector(object):
         self.current_pose = msg.pose
         closest_traffic_light_idx = -1
         closest_traffic_light_dist = 10000.0
+
+        #rospy.loginfo('Current Pose = [%f, %f]', self.current_pose.position.x, self.current_pose.position.y)
         # check if a traffic light is approaching
         for i in range(len(self.config['stop_line_positions'])):
             closest_wp_idx = self.get_closest_waypoint(self.current_pose)
@@ -79,10 +82,8 @@ class TLDetector(object):
                 stop_line_wp_idx = self.get_closest_waypoint(stop_line_wp_pose)
 
                 stop_line_dist = self.distance(self.base_waypoints, closest_wp_idx, stop_line_wp_idx)
-
                 # make sure the traffic light is within a relevant distance and ahead of vehicle
-                if((stop_line_dist < RELEVANT_TRAFFIC_LIGHT_DIST) and
-                   (self.config['stop_line_positions'][i][0] > self.base_waypoints[closest_wp_idx][0])):
+                if(stop_line_dist < RELEVANT_TRAFFIC_LIGHT_DIST):
                    # pick the traffic light closest to vehicle
                    if(stop_line_dist < closest_traffic_light_dist):
                        closest_traffic_light_dist = stop_line_dist
@@ -90,7 +91,7 @@ class TLDetector(object):
 
         if (closest_traffic_light_idx is not -1):
            self.upcoming_traffic_light = self.config['stop_line_positions'][closest_traffic_light_idx]
-           rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][closest_traffic_light_idx][0], self.config['stop_line_positions'][closest_traffic_light_idx][1], closest_traffic_light_dist)
+           #rospy.loginfo('Upcoming traffic light = [%f, %f]; Dist = %f', self.config['stop_line_positions'][closest_traffic_light_idx][0], self.config['stop_line_positions'][closest_traffic_light_idx][1], closest_traffic_light_dist)
         else:
            self.upcoming_traffic_light = None
 
@@ -104,9 +105,6 @@ class TLDetector(object):
                                             waypoints.waypoints[i].pose.pose.position.y])
 
     def traffic_cb(self, msg):
-        self.lights = msg.lights
-
-    def traffic_cb_orig(self, msg):
         self.lights = msg.lights
         light_pose = Pose()
         if self.upcoming_traffic_light is not None:
@@ -162,7 +160,7 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        # try to classify the image only if a traffic light exests in the ROI 
+        # try to classify the image only if a traffic light exests in the ROI
         if self.upcoming_traffic_light is not None:
             light_wp, state = self.process_traffic_lights()
 
@@ -188,13 +186,13 @@ class TLDetector(object):
         dist = 0
         dl = lambda a, b: math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)
         if(wp2 < wp1):
-            for i in range(wp1, wp2+len(waypoints)+1):
-                dist += dl(waypoints[wp1], waypoints[i-len(waypoints)])
-                wp1 = i-len(waypoints)
+            for i in range(wp1, len(waypoints)-1):
+                dist += dl(waypoints[i], waypoints[i+1])
+            for i in range(0, wp2):
+                dist += dl(waypoints[i], waypoints[i+1])
         else:
             for i in range(wp1, wp2+1):
-                dist += dl(waypoints[wp1], waypoints[i])
-                wp1 = i
+                dist += dl(waypoints[i], waypoints[i+1])
         return dist
 
     def get_closest_waypoint(self, pose):
