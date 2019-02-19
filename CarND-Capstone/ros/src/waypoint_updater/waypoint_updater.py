@@ -23,7 +23,7 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
 STOP_LINE_ADVANCE_DIST  = 7.0 # How far ahead of the stop line to stop the car
 STOP_DECEL_BEGIN_DIST   = 40.0 # when to start decelerating
 
